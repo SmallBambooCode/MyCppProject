@@ -7,6 +7,9 @@
 #include "myclass.h"
 using namespace std;
 int main() {
+	wstring wideString = L"个人通讯录管理系统";
+	SetConsoleTitle(wideString.c_str());
+	system("color 0B");
 	uList user;
 	while (1) {
 		int input;
@@ -147,7 +150,9 @@ int main() {
 					cL.fixContacts();
 					break;
 				case 6:
+					cout << "排序中，请稍等，数据量大时可能耗费时间较长。" << endl;
 					cL.sortContacts();
+					system("cls");
 					cL.printNode();
 					break;
 				case 7:

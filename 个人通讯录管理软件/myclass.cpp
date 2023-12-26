@@ -163,20 +163,13 @@ void List::saveNode() {
 	savedataFile.close();
 }
 void List::printNode() {
-	int pos = 1, page = 1, total=0, allpage, ct=0;
-	char input;
+	int pos = 1, page = 1, total=0, allpage, ct=0, numPerPage=10;
+	int input;
 	contacts* temp = head, *count = head;
 	//统计节点数
 	while (count != nullptr) {
 		total++;
 		count = count->getNext();
-	}
-	//计算总页数
-	if (total % 10 == 0) {
-		allpage = total / 10;
-	}
-	else {
-		allpage = total / 10 + 1;
 	}
 	if (total == 0) {
 		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
@@ -184,12 +177,20 @@ void List::printNode() {
 		return;
 	}
 	while (1) {
+		//计算总页数
+		if (total % numPerPage == 0) {
+			allpage = total / numPerPage;
+		}
+		else {
+			allpage = total / numPerPage + 1;
+		}
+		//屏幕输出
 		system("cls");
-		pos = (page - 1) * 10 + 1;
+		pos = (page - 1) * numPerPage + 1;
 		temp = head;
 		ct = 0;
 		cout << "=============================================================================================================" << endl;
-		cout << "[                                            通讯录  查看联系人                                   第" << right << setw(2) << page << '/' << left << setw(2) << allpage << "页 ]" << endl;
+		cout << "[ " << right << setw(3) << numPerPage << "条数据/页                               通讯录  查看联系人                                 第" << right << setw(3) << page << '/' << left << setw(3) << allpage << "页 ]" << endl;
 		cout << "=============================================================================================================" << endl;
 		cout << "姓名    手机号         座机号         QQ号           邮箱                     单位      地址      分类  " << endl;
 		while (temp != nullptr) {
@@ -200,36 +201,86 @@ void List::printNode() {
 			temp->printInfo();
 			temp = temp->getNext();
 			pos++;
-			if (pos % 10 == 1) {
+			if (pos % numPerPage == 1) {
 				break;
 			}
 		}
 		cout << "=============================================================================================================" << endl;
-		cout << "[                         输入[0]返回至菜单， 输入[1]查看上一页， 输入[2]查看下一页                         ]" << endl;
+		cout << "[     输入[0]返回至菜单  输入[1]查看上一页  输入[2]查看下一页  输入[3]进入页数跳转  输入[4]选择分页大小     ]" << endl;
 		cout << "=============================================================================================================" << endl;
 		while (1) {
-			cin >> input;
-			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
-			if (input < '0' || input > '2') {
+			if (!(cin >> input) || input < 0 || input > 4) {
 				cout << "数据输入错误，请重新输入：";
+				cin.clear();
+				cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
 				continue;
 			}
-			if (input == '0') {
+			if (input == 0) {
 				return;
 			}
-			else if (input == '1') {
+			else if (input == 1) {
 				if (page == 1) {
 					cout << "没有上一页了，请重新输入：";
 					continue;
 				}
 				page--;
 			}
-			else if (input =='2') {
+			else if (input ==2) {
 				if (page == allpage) {
 					cout << "没有下一页了，请重新输入：";
 					continue;
 				}
 				page++;
+			}
+			else if (input == 3) {
+				int target;
+				while (1) {
+					cout << "请输入要跳转到的页码：";
+					if (!(cin >> target) || target < 1 || target > allpage) {
+						cout << "页码范围有误，请重新输入！" << endl;
+						cin.clear();
+						cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+						Sleep(2000);
+						continue;
+					}
+					break;
+				}
+				page = target;
+			}
+			else if (input == 4) {
+				int input;
+				while (1) {
+					cout << "[1]10条/页  [2]20条/页  [3]30条/页  [4]50条/页  [5]100条/页\n请选择新的分页大小：";
+					if (!(cin >> input) || input < 1 || input > 5) {
+						cout << "页码范围有误，请重新输入！" << endl;
+						cin.clear();
+						cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+						Sleep(2000);
+						continue;
+					}
+					break;
+				}
+				switch (input) {
+					case 1:
+						numPerPage = 10;
+						break;
+					case 2:
+						numPerPage = 20;
+						break;
+					case 3:
+						numPerPage = 30;
+						break;
+					case 4:
+						numPerPage = 50;
+						break;
+					case 5:
+						numPerPage = 100;
+						break;
+					default:
+						numPerPage = 10;
+						break;
+				}
+				page = 1;
 			}
 			break;
 		}
