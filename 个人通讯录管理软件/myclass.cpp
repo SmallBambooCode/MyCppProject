@@ -1,11 +1,12 @@
 #include <iostream>
+#include "myclass.h"
 #define NOMINMAX
 #include <windows.h>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <conio.h>
-#include "myclass.h"
+
 using namespace std;
 
 //======================================================================================================================================
@@ -163,6 +164,11 @@ void List::saveNode() {
 	savedataFile.close();
 }
 void List::printNode() {
+	if (head == nullptr) {
+		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
+		Sleep(3000);
+		return;
+	}
 	int pos = 1, page = 1, total=0, allpage, ct=0, numPerPage=10;
 	int input;
 	contacts* temp = head, *count = head;
@@ -170,11 +176,6 @@ void List::printNode() {
 	while (count != nullptr) {
 		total++;
 		count = count->getNext();
-	}
-	if (total == 0) {
-		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
-		Sleep(3000);
-		return;
 	}
 	while (1) {
 		//计算总页数
@@ -212,7 +213,7 @@ void List::printNode() {
 			if (!(cin >> input) || input < 0 || input > 4) {
 				cout << "数据输入错误，请重新输入：";
 				cin.clear();
-				cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
 				continue;
 			}
 			if (input == 0) {
@@ -239,7 +240,7 @@ void List::printNode() {
 					if (!(cin >> target) || target < 1 || target > allpage) {
 						cout << "页码范围有误，请重新输入！" << endl;
 						cin.clear();
-						cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+						cin.ignore(numeric_limits<streamsize>::max(), '\n');
 						Sleep(2000);
 						continue;
 					}
@@ -254,7 +255,7 @@ void List::printNode() {
 					if (!(cin >> input) || input < 1 || input > 5) {
 						cout << "页码范围有误，请重新输入！" << endl;
 						cin.clear();
-						cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+						cin.ignore(numeric_limits<streamsize>::max(), '\n');
 						Sleep(2000);
 						continue;
 					}
@@ -310,6 +311,7 @@ void List::createContacts() {
 				int flag = 0;
 				cout << "请输入第" << num2 - num << "个联系人信息：" << endl;
 				cin >> name >> mobilephone >> telephone >> qq >> email >> unit >> address >> sort;
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
 				contacts* temp = head;
 				//姓名查重
 				while (temp != nullptr) {
@@ -356,7 +358,7 @@ void List::searchContacts() {
 		if (!(cin >> input) || input < 0 || input > 4) {
 			cout << "数据输入错误，请重新输入！" << endl;
 			cin.clear();
-			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			Sleep(2000);
 			continue;
 		}
@@ -367,6 +369,7 @@ void List::searchContacts() {
 			string content;
 			cout << "请输入查找内容：";
 			cin >> content;
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			cout << "查找完成，以下是查找结果：" << endl;
 			cout << "姓名    手机号         座机号         QQ号           邮箱                     单位      地址      分类  " << endl;
 			while (temp!=nullptr) {
@@ -392,11 +395,14 @@ void List::deleteContacts() {
 	}
 	string content;
 	while (1) {
+		temp = head;
+		system("cls");
 		cout << "==========================" << endl;
 		cout << "[   通讯录  删除联系人   ]" << endl;
 		cout << "==========================" << endl;
 		cout << "请输入需要删除的联系人姓名：";
 		cin >> content;
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		if (temp->getName() == content) {
 			head = head->getNext();
 			delete temp;
@@ -432,12 +438,15 @@ void List::fixContacts() {
 	}
 	string content;
 	while (1) {
+		system("cls");
+		temp = head;
 		cout << "==========================" << endl;
 		cout << "[   通讯录  修改联系人   ]" << endl;
 		cout << "==========================" << endl;
 		string telephone, mobilephone, qq, name, unit, address, sort, email; 
 		cout << "请输入需要修改的联系人姓名：";
 		cin >> content;
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		contacts* temp2 = head;
 		while (temp != nullptr) {
 			if (temp->getName() == content) {
@@ -446,6 +455,7 @@ void List::fixContacts() {
 					int flag = 0;
 					cout << "请按照格式输入修改后的数据：\n姓名 手机号 座机号 QQ号 邮箱 单位 住址 分类" << endl;
 					cin >> name >> mobilephone >> telephone >> qq >> email >> unit >> address >> sort;
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
 					temp2 = head;
 					while (temp2 != nullptr) {
 						if (temp2->getName() == name && temp2->getName() != content) {
@@ -499,6 +509,11 @@ void List::swapNode(contacts* x, contacts* y) {
 	}
 }
 void List::sortContacts() {
+	if (head == nullptr) {
+		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
+		Sleep(3000);
+		return;
+	}
 	contacts* temp = head;
 	int ct = 0;
 	while (temp != nullptr) {
@@ -515,11 +530,167 @@ void List::sortContacts() {
 		}
 	}
 }
+void List::shareContacts(User* userhead) {
+	string tmpName, tmpUsername;
+	contacts* temp = head;
+	if (head == nullptr) {
+		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
+		Sleep(3000);
+		return;
+	}
+	int flag = 0;
+	while (1) {
+		temp = head;
+		system("cls");
+		cout << "==========================" << endl;
+		cout << "[   通讯录  分享联系人   ]" << endl;
+		cout << "==========================" << endl;
+		cout << "请输入要分享的联系人姓名：";
+		cin >> tmpName;
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		while (temp != nullptr) {
+			if (temp->getName() == tmpName) {
+				flag = 1;
+				break;
+			}
+			temp = temp->getNext();
+		}
+		if (flag == 1) {
+			break;
+		}
+		cout << "找不到您输入的联系人，请重新输入！" << endl;
+		Sleep(2000);
+		continue;
+	}
+	flag = 0;
+	User* temp2 = userhead;
+	while (1) {
+		cout << "联系人获取成功，请输入要分享的目标用户：";
+		cin >> tmpUsername;
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		temp2 = userhead;
+		while (temp2 != nullptr) {
+			if (temp2->getName() == tmpUsername) {
+				if (temp2->getType() == "Root") {
+					flag = 2;
+					cout << "您不能分享联系人至管理员，请重新输入目标用户！" << endl;
+					Sleep(2000);
+					break;
+				}
+				ofstream saveFile("share.txt", ios::app);
+				if (!saveFile.is_open()) {
+					cout << "文件打开失败！" << endl;
+					Sleep(2000);
+					return;
+				}
+				saveFile << temp2->getName() << ' ';
+				temp->saveToFile(saveFile, username);
+				cout << "分享成功！对方登陆后即可收到提醒。" << endl;
+				saveFile.close();
+				flag = 1;
+				Sleep(3000);
+				break;
+			}
+			temp2 = temp2->getNext();
+		}
+		if (flag == 0) {
+			cout << "找不到用户，请重新输入用户名！" << endl;
+			Sleep(3000);
+			continue;
+		}
+		else if (flag == 2) {
+			continue;
+		}
+		else {
+			break;
+		}
+	}
+	return;
+}
+void List::receiveShare() {
+	ifstream readFile("share.txt");
+	ofstream tempFile("temp.txt");
+	if (!readFile.good()) {
+		ofstream createFile("share.txt");
+		if (!createFile.is_open()) {
+			cout << "无法创建share.txt文件！" << endl;
+			Sleep(2000);
+			return;
+		}
+		createFile.close();
+		readFile.open("share.txt");
+	}
+	string line;
+	int input;
+	while (getline(readFile, line)) {
+		string touser, fromuser, telephone, mobilephone, qq, name, unit, address, sort, email;
+		istringstream iss(line);
+		iss >> touser >> fromuser >> telephone >> mobilephone >> qq >> name >> unit >> address >> sort >> email;
+		//把不是当前用户的分享记录存到temp.txt文件
+		if (this->username != touser) {
+			tempFile << touser << ' ' << fromuser << ' ' << telephone << ' ' << mobilephone << ' ' << qq << ' ' << name << ' ' << unit << ' ' << address << ' ' << sort << ' ' << email << endl;
+			continue;
+		}
+		//用户选择是否接收分享
+		system("cls");
+		cout << "==========================" << endl;
+		cout << "[   通讯录  接收联系人   ]" << endl;
+		cout << "==========================" << endl;
+		cout << "接收到来自 " << fromuser << " 的联系人分享：" << endl;
+		cout << "姓名    手机号         座机号         QQ号           邮箱                     单位      地址      分类  " << endl;
+		cout << left << setw(8) << name << setw(15) << mobilephone << setw(15) << telephone << setw(15) << qq << setw(25) << email << setw(10) << unit << setw(10) << address << setw(10) << sort << endl;
+		while (1) {
+			cout << "请选择 [1]接收 或 [0]丢弃：";
+			if (!(cin >> input) || input < 0 || input > 1) {
+				cout << "数据输入错误，请重新输入！" << endl;
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				Sleep(2000);
+				continue;
+			}
+			break;
+		}
+		if (input == 0) {
+			cout << "丢弃成功！" << endl;
+			Sleep(1000);
+			continue;
+		}
+		//检测用户重复
+		int flag = 0;
+		contacts* temp = head;
+		while (temp!=nullptr) {
+			if (name == temp->getName()) {
+				cout << "检测到联系人姓名与已有联系人重复，自动丢弃。" << endl;
+				flag = 1;
+				Sleep(2000);
+				break;
+			}
+			temp = temp->getNext();
+		}
+		if (flag == 1) {
+			continue;
+		}
+		//把分享数据添加到当前用户的联系人链表中
+		addNode(telephone, mobilephone, qq, name, unit, address, sort, email);
+		cout << "保存成功！" << endl;
+		Sleep(1000);
+	}
+	//导入完成后，把temp.txt的其他用户分享记录写回share.txt
+	//做到删除当前用户的已导入分享
+	readFile.close();
+	tempFile.close();
+	ifstream readtempFile("temp.txt");
+	ofstream saveshareFile("share.txt");
+	saveshareFile << readtempFile.rdbuf();
+	readtempFile.close();
+	saveshareFile.close();
+}
+
 //======================================================================================================================================
 //User类的成员函数
 //======================================================================================================================================
 
-User::User(string usertype="User", string username = "UNKNOWN", string password = "UNKNOWN") {
+User::User(string usertype, string username, string password) {
 	this->usertype = usertype;
 	this->username = username;
 	this->password = password;
@@ -624,6 +795,9 @@ void uList::saveNode() {
 }
 User* uList::getcurrUser() {
 	return currUser;
+}
+User* uList::gethead() {
+	return head;
 }
 int uList::signIn() {
 	system("cls");
@@ -824,7 +998,6 @@ void uList::fixUserType() {
 		temp = head;
 		cout << "请输入您要修改的用户：";
 		cin >> content;
-		cin.clear();
 		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		while (temp != nullptr) {
 			if (temp->getName() == content) {
@@ -879,7 +1052,6 @@ void uList::fixPassword() {
 			temp = head;
 			cout << "请输入您要修改的用户：";
 			cin >> content;
-			cin.clear();
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			while (temp != nullptr) {
 				if (temp->getName() == content) {
@@ -967,7 +1139,6 @@ int uList::deleteUser() {
 			temp = head;
 			cout << "请输入您要删除的用户：";
 			cin >> content;
-			cin.clear();
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			if (temp->getName() == content) {
 				head = head->getNext();
@@ -1005,7 +1176,7 @@ int uList::deleteUser() {
 	}
 	else {
 		User* temp = head;
-		int input;
+		int input, flag = 0;
 		cout << "警告！您正在进行当前用户：" << currUser->getName() << " 的注销操作！" << endl;
 		while (1) {
 			cout << "是否确认注销？[1]确认  [0]取消：" << endl;
@@ -1017,26 +1188,26 @@ int uList::deleteUser() {
 				continue;
 			}
 			if (input == 1) {
+				//删除uList中的用户
 				if (temp->getName() == currUser->getName()) {
 					head = head->getNext();
 					delete temp;
 					temp = nullptr;
-					cout << "账户注销成功！" << endl;
-					Sleep(2000);
-					return 1;
+					flag = 1;
 				}
-				while (temp->getNext() != nullptr) {
+				while (flag != 1 && temp->getNext() != nullptr) {
 					if (temp->getNext()->getName() == currUser->getName()) {
 						User* q = temp->getNext();
 						temp->setNext(temp->getNext()->getNext());
 						delete q;
 						q = nullptr;
-						cout << "账户注销成功！" << endl;
-						Sleep(2000);
-						return 1;
+						break;
 					}
 					temp = temp->getNext();
 				}
+				cout << "账户注销成功！" << endl;
+				Sleep(2000);
+				return 1;
 			}
 			else {
 				return 0;

@@ -1,48 +1,6 @@
 #pragma once
 #include <iostream>
 using namespace std;
-class contacts {
-private:
-	string telephone;
-	string mobilephone;
-	string qq;
-	string name;
-	string unit;
-	string address;
-	string sort;
-	string email;
-	contacts* next;
-public:
-	contacts(string tel, string mob, string qq, string name, string unit, string address, string sort, string email);
-	void setNext(contacts* node);
-	contacts* getNext();
-	string getName();
-	void printInfo();
-	int searchInfo(int type, string content);
-	void saveToFile(ofstream& saveFile, string username);
-	void fixInfo(string tel, string mob, string qq, string name, string unit, string address, string sort, string email);
-};
-class List {
-private:
-	string username;
-	contacts* head;
-//链表基操
-public:
-	List(string username);
-	~List();
-	void initNode();
-	void addNode(string tel, string mob, string qq, string name, string unit, string address, string sort, string email);
-	void saveNode();
-//功能实现
-public:
-	void printNode();
-	void createContacts();
-	void searchContacts();
-	void deleteContacts();
-	void fixContacts();
-	void swapNode(contacts* x, contacts* y);
-	void sortContacts();
-};
 class User {
 private:
 	string usertype;
@@ -72,6 +30,7 @@ public:
 	void initNode();
 	User* addNode(string usertype, string username, string password);
 	void saveNode();
+	User* gethead();
 	//功能实现
 public:
 	int signIn();
@@ -82,4 +41,48 @@ public:
 	void fixPassword();
 	int deleteUser();
 	void encrype(string& password);
+};
+class contacts {
+private:
+	string telephone;
+	string mobilephone;
+	string qq;
+	string name;
+	string unit;
+	string address;
+	string sort;
+	string email;
+	contacts* next;
+public:
+	contacts(string tel, string mob, string qq, string name, string unit, string address, string sort, string email);
+	void setNext(contacts* node);
+	contacts* getNext();
+	string getName();
+	void printInfo();
+	int searchInfo(int type, string content);
+	void saveToFile(ofstream& saveFile, string username);
+	void fixInfo(string tel, string mob, string qq, string name, string unit, string address, string sort, string email);
+};
+class List {
+private:
+	string username;
+	contacts* head;
+	//链表基操
+public:
+	List(string username);
+	~List();
+	void initNode();
+	void addNode(string tel, string mob, string qq, string name, string unit, string address, string sort, string email);
+	void saveNode();
+	//功能实现
+public:
+	void printNode();
+	void createContacts();
+	void searchContacts();
+	void deleteContacts();
+	void fixContacts();
+	void swapNode(contacts* x, contacts* y);
+	void sortContacts();
+	void shareContacts(User* userhead);
+	void receiveShare();
 };

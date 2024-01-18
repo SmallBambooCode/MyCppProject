@@ -1,14 +1,13 @@
-//一定要让程序正常退出，也就是按0逐步退出，不要在运行时关闭窗口，否则数据不会存档，数据保存在析构函数中被调用
+//一定要让程序正常退出，也就是按0逐步退出，不要在运行时关闭窗口，否则部分数据不会存档，数据保存在析构函数中被调用
 #include <iostream>
-//用于cin.ignore(std::numeric_limits< streamsize >::max(), ‘\n’);报错
+#include "myclass.h"
+//用于解决cin.ignore(numeric_limits<streamsize>::max(), '\n');报错
 #define NOMINMAX
 #include <windows.h>
 #include <iomanip>
-#include "myclass.h"
 using namespace std;
 int main() {
-	wstring wideString = L"个人通讯录管理系统";
-	SetConsoleTitle(wideString.c_str());
+	SetConsoleTitle("个人通讯录管理系统_By张嘉伟");
 	system("color 0B");
 	uList user;
 	while (1) {
@@ -19,13 +18,14 @@ int main() {
 		cout << "==========================" << endl;
 		cout << "[     [1]通行证登录      ]" << endl;
 		cout << "[     [2]注册通行证      ]" << endl;
+		cout << "[     [3]关于本系统      ]" << endl;
 		cout << "[     [0]退出本系统      ]" << endl;
 		cout << "==========================" << endl;
 		cout << "请输入序号选择功能：";
-		if (!(cin >> input) || input < 0 || input > 2) {
+		if (!(cin >> input) || input < 0 || input > 3) {
 			cout << "数据输入错误，请重新输入！" << endl;
 			cin.clear();
-			cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			Sleep(2000);
 			continue;
 		}
@@ -40,11 +40,30 @@ int main() {
 			case 2:
 				user.signUp();
 				break;
+			case 3:
+				system("cls");
+				cout << "====================================================\n";
+				cout << "[              关于个人通讯录管理系统              ]\n";
+				cout << "====================================================\n";
+				cout << "[ 本系统拥有多用户管理，包括普通用户，VIP，管理员  ]\n";
+				cout << "[ 包括基本的联系人新建，删除，修改，查询，排序功能 ]\n";
+				cout << "[ 基本的用户注册，登录，改密，注销，权限组修改功能 ]\n";
+				cout << "====================================================\n";
+				cout << "[    程序特色：密码哈希加密保存，多功能分页显示    ]\n";
+				cout << "[    多用户支持，联系人分享，统一认证登录，严格    ]\n";
+				cout << "[    的输入检测等等    ]\n";
+				cout << "====================================================\n";
+				cout << "[ 作者:23人工智能 张嘉伟 ][ 感谢您的使用!ヾ(≧▽≦*)o ]\n";
+				cout << "====================================================\n";
+				cout << "输入0退出：";
+				while (getchar() != '0');
+				continue;
 			default:
 				return 0;
 		}
 		List cL(user.getcurrUser()->getName());
 		if (user.getcurrUser()->getType() == "User") {
+			cL.receiveShare();
 			int flag = 0;
 			while (1) {
 				int input;
@@ -57,53 +76,59 @@ int main() {
 				cout << "[        [2]查看联系人         ]" << endl;
 				cout << "[        [3]删除联系人         ]" << endl;
 				cout << "[        [4]修改联系人         ]" << endl;
-				cout << "[        [5]修改我的密码       ]" << endl;
-				cout << "[        [6]注销通行证         ]" << endl;
+				cout << "[        [5]分享联系人         ]" << endl;
+				cout << "[        [6]修改我的密码       ]" << endl;
+				cout << "[        [7]注销通行证         ]" << endl;
 				cout << "[        [0]退出本系统         ]" << endl;
 				cout << "================================" << endl;
 				cout << "[ 联系管理升级至VIP,享更多功能 ]" << endl;
 				cout << "================================" << endl;
+
 				cout << "请输入序号选择功能：";
-				if (!(cin >> input) || input < 0 || input > 6) {
+				if (!(cin >> input) || input < 0 || input > 7) {
 					cout << "数据输入错误，请重新输入！" << endl;
 					cin.clear();
-					cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
 					Sleep(2000);
 					continue;
 				}
 				switch (input) {
-				case 0:
-					flag = 1;
-					break;
-				case 1:
-					cL.createContacts();
-					break;
-				case 2:
-					cL.printNode();
-					break;
-				case 3:
-					cL.deleteContacts();
-					break;
-				case 4:
-					cL.fixContacts();
-					break;
-				case 5:
-					user.fixPassword();
-					break;
-				case 6:
-					if (user.deleteUser()) {
+					case 0:
 						flag = 1;
+						break;
+					case 1:
+						cL.createContacts();
+						break;
+					case 2:
+						cL.printNode();
+						break;
+					case 3:
+						cL.deleteContacts();
+						break;
+					case 4:
+						cL.fixContacts();
+						break;
+					case 5:
+						cL.shareContacts(user.gethead());
+						break;
+					case 6:
+						user.fixPassword();
+						break;
+					case 7:
+						if (user.deleteUser()) {
+							flag = 1;
+						}
+						break;
+					default:
+						break;
 					}
-					break;
-				default:
-					break;
-				}
 				if (flag == 1) {
 					break;
 				}
 			}
 		}
 		else if (user.getcurrUser()->getType() == "Vip") {
+			cL.receiveShare();
 			int flag = 0;
 			while (1) {
 				int input;
@@ -117,54 +142,58 @@ int main() {
 				cout << "[        [3]查找联系人         ]" << endl;
 				cout << "[        [4]删除联系人         ]" << endl;
 				cout << "[        [5]修改联系人         ]" << endl;
-				cout << "[        [6]联系人排序         ]" << endl;
-				cout << "[        [7]修改我的密码       ]" << endl;
-				cout << "[        [8]注销通行证         ]" << endl;
+				cout << "[        [6]分享联系人         ]" << endl;
+				cout << "[        [7]联系人排序         ]" << endl;
+				cout << "[        [8]修改我的密码       ]" << endl;
+				cout << "[        [9]注销通行证         ]" << endl;
 				cout << "[        [0]退出本系统         ]" << endl;
 				cout << "================================" << endl;
 				cout << "请输入序号选择功能：";
-				if (!(cin >> input) || input < 0 || input > 8) {
+				if (!(cin >> input) || input < 0 || input > 9) {
 					cout << "数据输入错误，请重新输入！" << endl;
 					cin.clear();
-					cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
 					Sleep(2000);
 					continue;
 				}
 				switch (input) {
-				case 0:
-					flag = 1;
-					break;
-				case 1:
-					cL.createContacts();
-					break;
-				case 2:
-					cL.printNode();
-					break;
-				case 3:
-					cL.searchContacts();
-					break;
-				case 4:
-					cL.deleteContacts();
-					break;
-				case 5:
-					cL.fixContacts();
-					break;
-				case 6:
-					cout << "排序中，请稍等，数据量大时可能耗费时间较长。" << endl;
-					cL.sortContacts();
-					system("cls");
-					cL.printNode();
-					break;
-				case 7:
-					user.fixPassword();
-					break;
-				case 8:
-					if (user.deleteUser()) {
+					case 0:
 						flag = 1;
-					}
-					break;
-				default:
-					break;
+						break;
+					case 1:
+						cL.createContacts();
+						break;
+					case 2:
+						cL.printNode();
+						break;
+					case 3:
+						cL.searchContacts();
+						break;
+					case 4:
+						cL.deleteContacts();
+						break;
+					case 5:
+						cL.fixContacts();
+						break;
+					case 6:
+						cL.shareContacts(user.gethead());
+						break;
+					case 7:
+						cout << "排序中，请稍等，数据量大时可能耗费时间较长。" << endl;
+						cL.sortContacts();
+						system("cls");
+						cL.printNode();
+						break;
+					case 8:
+						user.fixPassword();
+						break;
+					case 9:
+						if (user.deleteUser()) {
+							flag = 1;
+						}
+						break;
+					default:
+						break;
 				}
 				if (flag == 1) {
 					break;
@@ -172,53 +201,53 @@ int main() {
 			}
 		}
 		else if (user.getcurrUser()->getType() == "Root") {
-		int flag = 0;
-		while (1) {
-			int input;
-			system("cls");
-			cout << "================================" << endl;
-			cout << "[      个人通讯录管理系统      ]" << endl;
-			cout << "[      管理员用户：" << left << setw(8) << user.getcurrUser()->getName() << "    ]" << endl;
-			cout << "================================" << endl;
-			cout << "[        [1]查看通行证         ]" << endl;
-			cout << "[        [2]修改权限组         ]" << endl; 
-			cout << "[        [3]修改通行证         ]" << endl;
-			cout << "[        [4]删除通行证         ]" << endl;
-			cout << "[        [0]退出本系统         ]" << endl;
-			cout << "================================" << endl;
-			cout << "请输入序号选择功能：";
-			if (!(cin >> input) || input < 0 || input > 4) {
-				cout << "数据输入错误，请重新输入！" << endl;
-				cin.clear();
-				cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
-				Sleep(2000);
-				continue;
-			}
-			switch (input) {
-			case 0:
-				flag = 1;
-				break;
-			case 1:
-				user.printNode();
-				break;
-			case 2:
-				user.fixUserType();
-				break;
-			case 3:
-				user.fixPassword();
-				break;
-			case 4:
-				if (user.deleteUser()) {
-					flag = 1;
+			int flag = 0;
+			while (1) {
+				int input;
+				system("cls");
+				cout << "================================" << endl;
+				cout << "[      个人通讯录管理系统      ]" << endl;
+				cout << "[      管理员用户：" << left << setw(8) << user.getcurrUser()->getName() << "    ]" << endl;
+				cout << "================================" << endl;
+				cout << "[        [1]查看通行证         ]" << endl;
+				cout << "[        [2]修改权限组         ]" << endl; 
+				cout << "[        [3]修改通行证         ]" << endl;
+				cout << "[        [4]删除通行证         ]" << endl;
+				cout << "[        [0]退出本系统         ]" << endl;
+				cout << "================================" << endl;
+				cout << "请输入序号选择功能：";
+				if (!(cin >> input) || input < 0 || input > 4) {
+					cout << "数据输入错误，请重新输入！" << endl;
+					cin.clear();
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+					Sleep(2000);
+					continue;
 				}
-				break;
-			default:
-				break;
+				switch (input) {
+					case 0:
+						flag = 1;
+						break;
+					case 1:
+						user.printNode();
+						break;
+					case 2:
+						user.fixUserType();
+						break;
+					case 3:
+						user.fixPassword();
+						break;
+					case 4:
+						if (user.deleteUser()) {
+							flag = 1;
+						}
+						break;
+					default:
+						break;
+				}
+				if (flag == 1) {
+					break;
+				}
 			}
-			if (flag == 1) {
-				break;
-			}
-		}
 		}
 	}
 	return 0;
