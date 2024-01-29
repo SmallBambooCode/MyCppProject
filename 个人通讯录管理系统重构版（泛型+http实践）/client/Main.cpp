@@ -4,11 +4,16 @@
 #define NOMINMAX
 #include <windows.h>
 using namespace std;
-User* userHead = new Common;
 int main() {
+	//新建用户链表头
+	User* userHead = new Common;
+	//初始化用户链表
 	userHead->initNode();
+	//设置CMD标题
 	SetConsoleTitle("个人通讯录管理系统_By张嘉伟");
+	//修改自己颜色
 	system("color 0B");
+	//前台死循环
 	while (1) {
 		int input;
 		system("cls");
@@ -21,30 +26,43 @@ int main() {
 		cout << "[     [0]退出本系统      ]" << endl;
 		cout << "==========================" << endl;
 		cout << "请输入序号选择功能：";
+		//输入合法性检查
 		if (!(cin >> input) || input < 0 || input > 3) {
 			cout << "数据输入错误，请重新输入！" << endl;
+			//情况输入缓存区
 			cin.clear();
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			Sleep(2000);
 			continue;
 		}
+		//switch-case分支
 		switch (input) {
+		//退出系统
 		case 0:
+			//保存当前用户
 			userHead->saveNode(userHead);
+			//调用函数模板，::是调用全局函数，退出系统时删除链表
 			::deleteAll(userHead);
+			//删除链表头节点
 			delete userHead;
+			//头节点赋空
 			userHead = nullptr;
 			return 0;
+		//登录
 		case 1:
+			//判断登录返回值
 			if (userHead->signIn(userHead) != 1) {
 				continue;
 			}
+			//成功登录后进入用户菜单选项
 			userHead->menuSelect(userHead);
 			break;
+		//注册
 		case 2:
 			userHead->signUp(userHead);
 			userHead->menuSelect(userHead);
 			break;
+		//关于
 		case 3:
 			system("cls");
 			cout << "====================================================\n";
@@ -67,6 +85,4 @@ int main() {
 			return 0;
 		}
 	}
-	userHead->saveNode(userHead);
-	return 0;
 }

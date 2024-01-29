@@ -43,34 +43,34 @@ public:
 class Root : public User {
 public:
 	Root(string username = "UNKNWON", string password = "UNKNWON");
-	string getType();
-	void printNode(User* userHead);
-    void enterMenu(User* userHead);
-    int deleteUser(User* userHead, Contacts* contactsHead);
-    int fixType(User* userHead);
-    void fixPassword(User* userHead);
+	string getType();//获取用户类型，返回不同类型
+	void printNode(User* userHead);//只有Root能查看
+    void enterMenu(User* userHead);//不同用户进入不同菜单
+    int deleteUser(User* userHead, Contacts* contactsHead);//管理员可以删除所有用户
+    int fixType(User* userHead);//只有Root能修改用户类型
+    void fixPassword(User* userHead);//管理员可以修改所有人的
 };
 //================================================================================//
 class Common : public User {
 public:
 	Common(string username = "UNKNWON", string password = "UNKNWON");
-	string getType();
-	void printNode(User* userHead);
-    void enterMenu(User* userHead);
-    int deleteUser(User* userHead, Contacts* contactsHead);
-    int fixType(User* userHead);
-    void fixPassword(User* userHead);
+	string getType();//获取用户类型，返回不同类型
+	void printNode(User* userHead);//返回无权限
+    void enterMenu(User* userHead);//不同用户进入不同菜单
+    int deleteUser(User* userHead, Contacts* contactsHead);//普通用户自己注销
+    int fixType(User* userHead);//返回无权限
+    void fixPassword(User* userHead);//修改自己的密码
 };
 //================================================================================//
 class Vip : public User {
 public:
 	Vip(string username = "UNKNWON", string password = "UNKNWON");
-	string getType();
-	void printNode(User* userHead);
-    void enterMenu(User* userHead);
-    int deleteUser(User* userHead, Contacts* contactsHead);
-    int fixType(User* userHead);
-    void fixPassword(User* userHead);
+	string getType();//获取用户类型，返回不同类型
+	void printNode(User* userHead);//返回无权限
+    void enterMenu(User* userHead);//不同用户进入不同菜单
+    int deleteUser(User* userHead, Contacts* contactsHead);//普通用户自己注销
+    int fixType(User* userHead);//返回无权限
+    void fixPassword(User* userHead);//修改自己的密码
 };
 //================================================================================//
 //================================================================================//
@@ -105,9 +105,9 @@ public:
 	void searchContacts(Contacts* contactsHead);//搜索联系人
 	void fixContacts(Contacts* contactsHead);//修改联系人
 	void fixInfo(string tel, string mob, string qq, string name, string unit, string address, string sort, string email);
-	void swapNode(Contacts* x, Contacts* y, Contacts* contactsHead);//交换节点
+	//void swapNode(Contacts* x, Contacts* y, Contacts* contactsHead);//交换节点
 	void sortContacts(Contacts* contactsHead);//联系人排序（依据名字正序）
 	void shareContacts(Contacts* contactsHead, User* userHead);//分享联系人
 	void receiveShare(Contacts* contactsHead);//接收联系人
-	void cloudFunction(Contacts* contactsHead);
+	void cloudFunction(Contacts* contactsHead);//云端数据服务
 };

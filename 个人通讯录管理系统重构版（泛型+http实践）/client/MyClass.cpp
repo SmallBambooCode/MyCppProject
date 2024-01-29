@@ -10,12 +10,17 @@
 #include "MyClass.h"
 #include "TemplateFunc.cpp"
 using namespace std;
+//全局变量
+//当前的用户（存储了父类（User）指针，用于多态）
 User* currUser;
 //全局函数
 //哈希加密
 void encrype(string& str) {
+	//创建一个哈希器对象以对字符串的内容进行哈希处理
 	hash<string> hasher;
+	//计算字符串的哈希值
 	size_t hash = hasher(str);
+	//将哈希值转换为字符串表示形式
 	str = to_string(hash);
 	return;
 }
@@ -27,22 +32,23 @@ string getTime() {
 	stringstream currTime;
 	//类似于sprintf，把数据存入currTime
 	currTime << time.wYear << "年"
-		<< std::setw(2) << std::setfill('0') << time.wMonth << "月"
-		<< std::setw(2) << std::setfill('0') << time.wDay << "日"
-		<< std::setw(2) << std::setfill('0') << time.wHour << ":"
-		<< std::setw(2) << std::setfill('0') << time.wMinute << ":"
-		<< std::setw(2) << std::setfill('0') << time.wSecond;
+		<< setw(2) << setfill('0') << time.wMonth << "月"
+		<< setw(2) << setfill('0') << time.wDay << "日"
+		<< setw(2) << setfill('0') << time.wHour << ":"
+		<< setw(2) << setfill('0') << time.wMinute << ":"
+		<< setw(2) << setfill('0') << time.wSecond;
 	return currTime.str();//使用.str()方法把字符串流转换为字符串
 }
 //保存日志
 void logsSave(string content) {
+	//用追加方式打开文件
 	ofstream saveFile("logs.txt", ios::app);
 	if (!saveFile.is_open()) {
 		cout << "文件打开失败！" << endl;
 		Sleep(2000);
 		return;
 	}
-	getTime();	
+	//getTime()更新当前时间，返回值为字符串
 	saveFile << getTime() << ' ' << currUser->getUsername() << ' ' << content << endl;
 	saveFile.close();
 	return;
@@ -127,7 +133,7 @@ User::User(string username, string password) {
 	this->password = password;
 	this->next = nullptr;
 }
-//为什么不写析构把链表删除？因为每delete一个节点，都会触发析构。
+//为什么不写析构把链表删除？因为每delete一个节点（节点存的是类的对象的指针），都会触发析构。
 User::~User() { }
 Root::Root(string username, string password) : User(username, password) { }
 Common::Common(string username, string password) : User(username, password) { }
@@ -236,6 +242,7 @@ int User::checkInfo(string username, string password) {
 		return 0;
 	}
 }
+//注册
 void User::signUp(User* userHead) {
 	while (1) {
 		system("cls");
@@ -309,12 +316,14 @@ void User::signUp(User* userHead) {
 		::addNode(this,(currUser = new Common(iusername, ipassword)));
 		/*addNode(currUser = new Common(iusername, ipassword));*/
 		saveNode(userHead);
+		//保存日志
 		logsSave("注册成功");
 		Sleep(2000);
 		break;
 	}
 	return;
 }
+//登录
 int User::signIn(User* userHead) {
 	system("cls");
 	cout << "==========================" << endl;
@@ -401,19 +410,25 @@ int User::signIn(User* userHead) {
 	cout << "登陆失败！" << endl;
 	return 0;
 }
+//菜单选择
 void User::menuSelect(User* userHead) {
+	//多态实现不同用户进入不同菜单
 	currUser->enterMenu(userHead);
 	return;
 }
+//获取用户名
 string User::getUsername() {
 	return username;
 }
+//获取密码
 string User::getPassword() {
 	return password;
 }
+//设置新密码
 void User::setPassword(string newPassword) {
 	this->password = newPassword;
 }
+//重设用户权限组
 void User::setType(string usertype, User* userHead) {
 	//注意调用setType时，一定要让用户重新登录，否则再次使用功能时当前用户节点已经释放了！
 	//无法直接在不同类型的子类对象直接转换，所以先新建一个新的节点
@@ -439,7 +454,7 @@ void User::setType(string usertype, User* userHead) {
 		temp = temp->getNext();
 	}
 }
-
+//获取用户类型
 string Root::getType() {
 	return "Root";
 }
@@ -449,6 +464,7 @@ string Common::getType() {
 string Vip::getType() {
 	return "Vip";
 }
+//查看通行证
 void Root::printNode(User* userHead) {
 	system("cls");
 	cout << "========================================" << endl;
@@ -487,7 +503,7 @@ void Root::enterMenu(User* userHead) {
 		cout << "[        [4]删除通行证         ]" << endl;
 		cout << "[        [5]查看系统日志       ]" << endl;
 		cout << "[        [6]清空系统日志       ]" << endl;
-		cout << "[        [0]退出本系统         ]" << endl;
+		cout << "[        [0]退出登录           ]" << endl;
 		cout << "================================" << endl;
 		
 		cout << "请输入序号选择功能：";
@@ -499,32 +515,39 @@ void Root::enterMenu(User* userHead) {
 			continue;
 		}
 		switch (input) {
+		//退出登录
 		case 0:
 			flag = 1;
 			logsSave("退出登录");
 			break;
+		//查看通行证
 		case 1:
 			currUser->printNode(userHead);
 			//查看完成后同时记录日志
 			logsSave("查看了通行证");
 			break;
+		//修改权限组
 		case 2:
 			if (currUser->fixType(userHead)) {
 				flag = 1;
 			}
 			break;
+		//通行证改密
 		case 3:
 			currUser->fixPassword(userHead);
 			break;
+		//删除通行证
 		case 4:
 			if (currUser->deleteUser(userHead, new Contacts)) {
 				flag = 1;
 			}
 			break;
+		//查看系统日志
 		case 5:
 			logsReadRoot();
 			logsSave("查看了系统日志");
 			break;
+		//清空系统日志
 		case 6:
 			logsClean();
 			logsSave("清空了系统日志");
@@ -537,6 +560,7 @@ void Root::enterMenu(User* userHead) {
 		}
 	}
 }
+//普通用户菜单
 void Common::enterMenu(User* userHead) {
 	Contacts* contactsHead = new Contacts;
 	contactsHead->initNode();
@@ -556,7 +580,7 @@ void Common::enterMenu(User* userHead) {
 		cout << "[        [5]分享联系人         ]" << endl;
 		cout << "[        [6]修改我的密码       ]" << endl;
 		cout << "[        [7]注销通行证         ]" << endl;
-		cout << "[        [0]退出本系统         ]" << endl;
+		cout << "[        [0]退出登录           ]" << endl;
 		cout << "================================" << endl;
 		cout << "[ 联系管理升级至VIP,享更多功能 ]" << endl;
 		cout << "================================" << endl;
@@ -570,6 +594,7 @@ void Common::enterMenu(User* userHead) {
 			continue;
 		}
 		switch (input) {
+		//退出登录
 		case 0:
 			flag = 1;
 			::deleteAll(contactsHead);
@@ -577,26 +602,33 @@ void Common::enterMenu(User* userHead) {
 			contactsHead = nullptr;
 			logsSave("退出登录");
 			break;
+		//新建联系人
 		case 1:
 			contactsHead->createContacts(contactsHead);
 			break;
+		//查看联系人
 		case 2:
 			contactsHead->printContacts(contactsHead);
 			//查看完成后同时记录日志
 			logsSave("查看了联系人");
 			break;
+		//删除联系人
 		case 3:
 			contactsHead->deleteContacts(contactsHead);
 			break;
+		//修改联系人
 		case 4:
 			contactsHead->fixContacts(contactsHead);
 			break;
+		//分享联系人
 		case 5:
 			contactsHead->shareContacts(contactsHead, userHead);
 			break;
+		//修改密码
 		case 6:
 			currUser->fixPassword(userHead);
 			break;
+		//注销通行证
 		case 7:
 			if (currUser->deleteUser(userHead, contactsHead)) {
 				flag = 1;
@@ -611,6 +643,7 @@ void Common::enterMenu(User* userHead) {
 	}
 	return;
 }
+//Vip用户菜单
 void Vip::enterMenu(User* userHead) {
 	Contacts* contactsHead = new Contacts;
 	contactsHead->initNode();
@@ -634,13 +667,14 @@ void Vip::enterMenu(User* userHead) {
 		cout << "[        [9]注销通行证         ]" << endl;
 		cout << "[        [A]查看操作日志       ]" << endl;
 		cout << "[        [B]云端备份恢复       ]" << endl;
-		cout << "[        [0]退出本系统         ]" << endl;
+		cout << "[        [0]退出登录           ]" << endl;
 		cout << "================================" << endl;
 		cout << "请输入序号选择功能：";
 		cin >> input;
 		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 		//由于VIP功能太多了，超过了0~9，所以直接输入字符，0~A
 		switch (input) {
+		//退出登录
 		case '0':
 			flag = 1;
 			::deleteAll(contactsHead);
@@ -648,43 +682,54 @@ void Vip::enterMenu(User* userHead) {
 			contactsHead = nullptr;
 			logsSave("退出登录");
 			break;
+		//新建联系人
 		case '1':
 			contactsHead->createContacts(contactsHead);
 			break;
+		//查看联系人
 		case '2':
 			contactsHead->printContacts(contactsHead);
 			logsSave("查看了联系人");
 			break;
+		//查看联系人
 		case '3':
 			contactsHead->searchContacts(contactsHead);
 			break;
+		//删除联系人
 		case '4':
 			contactsHead->deleteContacts(contactsHead);
 			break;
+		//修改联系人
 		case '5':
 			contactsHead->fixContacts(contactsHead);
 			break;
+		//分享联系人
 		case '6':
 			contactsHead->shareContacts(contactsHead, userHead);
 			break;
+		//联系人排序
 		case '7':
 			cout << "排序中，请稍等，数据量大时可能耗费时间较长。" << endl;
 			contactsHead->sortContacts(contactsHead);
 			contactsHead->printContacts(contactsHead);
 			logsSave("执行了联系人排序");
 			break;
+		//修改密码
 		case '8':
 			currUser->fixPassword(userHead);
 			break;
+		//注销通行证
 		case '9':
 			if (currUser->deleteUser(userHead, contactsHead)) {
 				flag = 1;
 			}
 			break;
+		//查看日志
 		case 'A':
 			logsReadClient();
 			logsSave("查看了操作日志");
 			break;
+		//云端备份恢复
 		case 'B':
 			contactsHead->cloudFunction(contactsHead);
 			break;
@@ -699,6 +744,7 @@ void Vip::enterMenu(User* userHead) {
 	}
 	return;
 }
+//管理员菜单
 int Root::deleteUser(User* userHead, Contacts* contactsHead) {
 	delete contactsHead;
 	system("cls");
@@ -709,6 +755,7 @@ int Root::deleteUser(User* userHead, Contacts* contactsHead) {
 	string currUsername = currUser->getUsername();
 	cout << "当前的用户数据如下：" << endl;
 	cout << "权限组  用户名" << endl;
+	//输出所有用户
 	while (temp->getNext() != nullptr) {
 		cout << setw(8) << temp->getNext()->getType() << setw(8) << temp->getNext()->getUsername() << endl;
 		temp = temp->getNext();
@@ -720,6 +767,7 @@ int Root::deleteUser(User* userHead, Contacts* contactsHead) {
 		cout << "请输入您要删除的用户（管理员删除用户时，不会清空用户的本地与云端数据）：";
 		cin >> content;
 		cin.ignore(numeric_limits<streamsize>::max(), '\n');
+		//判断要删除的用户是否为当前登录用户，以便执行自动退出登录功能
 		if (currUser->getUsername() == content) {
 			returnValue = 1;
 		}
@@ -734,10 +782,12 @@ int Root::deleteUser(User* userHead, Contacts* contactsHead) {
 				}
 				else {
 					cout << endl;
+					//保存日志，一定要先保存日志，再删除，不然就会调用空指针了！
 					stringstream logsContent;
 					logsContent << "删除了用户[" << content << ']';
 					logsSave(logsContent.str());
 				}
+				//调用函数模板，删除节点
 				::deleteNode(temp->getNext(), userHead);
 				cout << "用户删除成功！";
 				saveNode(userHead);
@@ -752,6 +802,7 @@ int Root::deleteUser(User* userHead, Contacts* contactsHead) {
 	}
 	return 0;
 }
+//用户注销自己的账号
 int Common::deleteUser(User* userHead, Contacts* contactsHead) {
 	system("cls");
 	cout << "========================================" << endl;
@@ -786,6 +837,7 @@ int Common::deleteUser(User* userHead, Contacts* contactsHead) {
 		}
 	}
 }
+//用户注销自己的账号
 int Vip::deleteUser(User* userHead, Contacts* contactsHead) {
 	system("cls");
 	cout << "========================================" << endl;
@@ -811,10 +863,10 @@ int Vip::deleteUser(User* userHead, Contacts* contactsHead) {
 			stringstream filename;
 			filename << username << ".txt";
 			//创建HTTP客户端
-			httplib::Client client("example.com", 19060);
+			httplib::Client client("mc-sh.xzvps.top", 19060);
 			stringstream serverpath;
 			serverpath << "/remove/" << filename.str();
-			//发送GET请求，删除服务器中的文件
+			//发送GET请求，删除服务器中的文件，目录例如/remove/114514.txt
 			auto res = client.Get(serverpath.str());
 			//直接调用deleteAll删除用户数据
 			::deleteAll(contactsHead);
@@ -832,6 +884,7 @@ int Vip::deleteUser(User* userHead, Contacts* contactsHead) {
 		}
 	}
 }
+//管理员修改权限组
 int Root::fixType(User* userHead) {
 	system("cls");
 	cout << "========================================" << endl;
@@ -911,14 +964,17 @@ int Root::fixType(User* userHead) {
 		continue;
 	}
 }
+//用户无法修改权限组
 int Common::fixType(User* userHead) {
 	cout << "没有权限！" << endl;
 	return 0;
 }
+//用户无法修改权限组
 int Vip::fixType(User* userHead) {
 	cout << "没有权限！" << endl;
 	return 0;
 }
+//管理员修改所有人密码
 void Root::fixPassword(User* userHead) {
 	system("cls");
 	cout << "========================================" << endl;
@@ -979,6 +1035,7 @@ void Root::fixPassword(User* userHead) {
 		continue;
 	}
 }
+//普通用户修改自己的密码
 void Common::fixPassword(User* userHead) {
 	system("cls");
 	cout << "========================================" << endl;
@@ -1014,6 +1071,7 @@ void Common::fixPassword(User* userHead) {
 	Sleep(2000);
 	return;
 }
+//普通用户修改自己的密码
 void Vip::fixPassword(User* userHead) {
 	system("cls");
 	cout << "========================================" << endl;
@@ -1073,6 +1131,7 @@ void Contacts::setNext(Contacts* next) {
 	this->next = next;
 	return;
 }
+//联系人链表初始化
 void Contacts::initNode() {
 	//新建文件输入流
 	ifstream inputFile("data.txt");
@@ -1133,6 +1192,7 @@ void Contacts::initNode() {
 //		delete toDelete;
 //	}
 //}
+//保存链表至文件
 void Contacts::saveNode(Contacts* contactsHead) {
 	ifstream readFile("data.txt");
 	ofstream tempFile("temp.txt");
@@ -1175,9 +1235,11 @@ void Contacts::saveNode(Contacts* contactsHead) {
 	readtempFile.close();
 	savedataFile.close();
 }
+//获取联系人名字
 string Contacts::getName() {
 	return this->name;
 }
+//新建联系人
 void Contacts::createContacts(Contacts* contactsHead) {
 	//num2用于备份num，到时num变化算差值
 	int num = 0, num2 = 0;
@@ -1262,6 +1324,7 @@ void Contacts::createContacts(Contacts* contactsHead) {
 	}
 	return;
 }
+//输出联系人
 void Contacts::printContacts(Contacts* contactsHead) {
 	//多功能分页查看解释具体看我的博客：https://notes.smallbamboo.cn/CPPDisplayPage.html
 
@@ -1390,6 +1453,7 @@ void Contacts::printContacts(Contacts* contactsHead) {
 	}
 	return;
 }
+//删除联系人
 void Contacts::deleteContacts(Contacts* contactsHead) {
 	if (contactsHead->getNext() == nullptr) {
 		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
@@ -1427,6 +1491,7 @@ void Contacts::deleteContacts(Contacts* contactsHead) {
 	}
 	return;
 }
+//修改联系人
 void Contacts::fixContacts(Contacts* contactsHead) {
 	if (contactsHead->getNext() == nullptr) {
 		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
@@ -1519,6 +1584,7 @@ void Contacts::fixContacts(Contacts* contactsHead) {
 	}
 	return;
 }
+//搜索联系人
 void Contacts::searchContacts(Contacts* contactsHead) {
 	if (contactsHead->getNext() == nullptr) {
 		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
@@ -1555,6 +1621,7 @@ void Contacts::searchContacts(Contacts* contactsHead) {
 			cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			cout << "查找完成，以下是查找结果：" << endl;
 			cout << "姓名    手机号         座机号         QQ号           邮箱                     单位      地址      分类  " << endl;
+			//记录日志
 			stringstream logsContent;
 			if (input == 1) {
 				logsContent << "查找了联系人姓名[" << content << ']';
@@ -1568,6 +1635,7 @@ void Contacts::searchContacts(Contacts* contactsHead) {
 			else if (input == 4) {
 				logsContent << "查找了联系人分类[" << content << ']';
 			}
+			//查找对应的类目，并且输出
 			while (temp->getNext() != nullptr) {
 				if (input == 1 && temp->getNext()->name == content) {
 					cout << setw(8) << temp->getNext()->name << setw(15) << temp->getNext()->mobilephone << setw(15) << temp->getNext()->telephone << setw(15) << temp->getNext()->qq << setw(25) << temp->getNext()->email << setw(10) << temp->getNext()->unit << setw(10) << temp->getNext()->address << setw(10) << temp->getNext()->sort << endl;
@@ -1587,9 +1655,11 @@ void Contacts::searchContacts(Contacts* contactsHead) {
 				}
 				temp = temp->getNext();
 			}
+			//若计数为0，则未查询到信息
 			if (count == 0) {
 				cout << "没有查找到任何数据" << endl;
 			}
+			//日志保存查询到的数量
 			logsContent << "，并且查找到了[" << count << "]条数据";
 			logsSave(logsContent.str());
 			cout << "输入0退出本功能：";
@@ -1600,19 +1670,21 @@ void Contacts::searchContacts(Contacts* contactsHead) {
 	return;
 }
 //节点交换函数
-void Contacts::swapNode(Contacts* a, Contacts* b, Contacts* contactsHead) {
-	Contacts* temp = contactsHead;
-	//此循环用于找到a节点的上一个节点
-	while (temp->getNext() != a) {
-		temp = temp->getNext();
-	}
-	//让a的上一个节点（temp）指向b
-	temp->setNext(b);
-	//让a的下一个指向b的下一个
-	a->setNext(b->getNext());
-	//让b的下一个指向a
-	b->setNext(a);
-}
+//void Contacts::swapNode(Contacts* a, Contacts* b, Contacts* contactsHead) {
+//	Contacts* temp = contactsHead;
+//	//此循环用于找到a节点的上一个节点
+//	while (temp->getNext() != a) {
+//		temp = temp->getNext();
+//	}
+//	//让a的上一个节点（temp）指向b
+//	temp->setNext(b);
+//	//让a的下一个指向b的下一个
+//	a->setNext(b->getNext());
+//	//让b的下一个指向a
+//	b->setNext(a);
+//	return;
+//}
+//联系人排序
 void Contacts::sortContacts(Contacts* contactsHead) {
 	if (contactsHead->getNext() == nullptr) {
 		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
@@ -1636,6 +1708,7 @@ void Contacts::sortContacts(Contacts* contactsHead) {
 		}
 	}
 }
+//联系人分享
 void Contacts::shareContacts(Contacts* contactsHead, User* userHead) {
 	if (contactsHead->getNext() == nullptr) {
 		cout << "您的通讯录中无数据，请先添加联系人！" << endl;
@@ -1710,20 +1783,24 @@ void Contacts::shareContacts(Contacts* contactsHead, User* userHead) {
 			}
 			temp2 = temp2->getNext();
 		}
+		//找不到则重新输入
 		if (flag == 0) {
 			cout << "找不到用户，请重新输入用户名！" << endl;
 			Sleep(3000);
 			continue;
 		}
+		//不能分享到管理员，则重新输入
 		else if (flag == 2) {
 			continue;
 		}
+		//退出
 		else {
 			break;
 		}
 	}
 	return;
 }
+//接收联系人分享
 void Contacts::receiveShare(Contacts* contactsHead) {
 	ifstream readFile("share.txt");
 	ofstream tempFile("temp.txt");
@@ -1822,6 +1899,10 @@ void Contacts::fixInfo(string tel, string mob, string qq, string name, string un
 	return;
 }
 void Contacts::cloudFunction(Contacts* contactsHead) {
+	//非Vip检测
+	if (currUser->getType() != "Vip") {
+		cout << "非法的访问" << endl;
+	}
 	int input;
 	while (1) {
 		system("cls");
@@ -1842,6 +1923,7 @@ void Contacts::cloudFunction(Contacts* contactsHead) {
 		}
 		break;
 	}
+	//构建哈希运算后的用户名作为文件名，防止用户的数据被明显泄露
 	string username = currUser->getUsername();
 	encrype(username);
 	stringstream filename;
@@ -1852,7 +1934,7 @@ void Contacts::cloudFunction(Contacts* contactsHead) {
 			Sleep(3000);
 			return;
 		}
-		//保存当前用户数据
+		//保存当前用户数据至待备份文件
 		ofstream saveFile(filename.str());
 		Contacts* temp = contactsHead;
 		while (temp->getNext() != nullptr) {
@@ -1867,7 +1949,8 @@ void Contacts::cloudFunction(Contacts* contactsHead) {
 		file.close();
 
 		//创建HTTP客户端
-		httplib::Client client("example.com", 19060);
+		httplib::Client client("mc-sh.xzvps.top", 19060);
+		//多形式数据集列表初始化
 		httplib::MultipartFormDataItems items = {
 		{"ContatcsDataText", content, filename.str(), "text/plain"}
 		};
@@ -1882,25 +1965,26 @@ void Contacts::cloudFunction(Contacts* contactsHead) {
 		else {
 			cout << "数据备份失败，错误代码：" << res.error() << endl;
 		}
-		//删除创建的文件，保证安全
+		//删除创建的备份文件，保证安全
 		remove(filename.str().c_str());
 	}
 	else if (input == 2) {
 		//创建HTTP客户端
-		httplib::Client client("example.com", 19060);
+		httplib::Client client("mc-sh.xzvps.top", 19060);
+		//构建下载访问目录字符串
 		stringstream serverpath;
 		serverpath << "/download/" << filename.str();
 		//发送GET请求，从服务器下载文件
 		auto res2 = client.Get(serverpath.str());
-		// 检查响应状态码
+		//检查响应状态码
 		if (res2 && res2->status == 200) {
-			// 保存文件内容到本地
+			//保存文件内容到本地
 			ofstream ofs(filename.str(), ios::binary);
 			ofs.write(res2->body.c_str(), res2->body.length());
 			ofs.close();
 		}
 		else {
-			cout << "暂无云端备份数据。" << endl;
+			cout << "暂无云端备份数据或无法连接到服务器。" << endl;
 			Sleep(3000);
 			return;
 		}
@@ -1925,6 +2009,7 @@ void Contacts::cloudFunction(Contacts* contactsHead) {
 		}
 		inputFile.close();
 		cout << "云端数据同步成功，本地数据已被覆盖" << endl;
+		contactsHead->saveNode(contactsHead);
 		logsSave("将云端数据同步到了本地");
 		//删除下载的文件，保证安全
 		remove(filename.str().c_str());
